@@ -9,7 +9,7 @@
     ],
     "homepage": "http://github.com/solexdoc/shopify-php-sdk",
     "license": "MIT",
-    "authors": ["Sylvain Cyr", "Rob Wittman (Original author)"],
+    "authors": [{"name":"Sylvain Cyr/Solex"}, {"name":"Rob Wittman (Original author)"}],
     "require": {
         "php": ">=7.2",
         "ext-curl": "*",
