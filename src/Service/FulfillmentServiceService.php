@@ -30,6 +30,7 @@ class FulfillmentServiceService extends AbstractService
             'fulfillment_service' => $data
             )
         );
+
         $fulfillmentService->setData($response['fulfillment_service']);
     }
 
