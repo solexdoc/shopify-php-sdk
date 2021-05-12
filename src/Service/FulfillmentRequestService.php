@@ -8,11 +8,9 @@ use Shopify\Object\Order;
 class FulfillmentRequestService extends AbstractService
 {
     /**
-     * Retrieve a list of inventoryItems
+     * Accept fulfillmentRequest
      *
      * @link   https://help.shopify.com/api/reference/order#index
-     * @param  array $params
-     * @return Order[]
      */
     public function acceptFulfillmentRequest(string $fulfillmentOrderId,$message="Fulfillment request accepted", array $params = [])
     {
