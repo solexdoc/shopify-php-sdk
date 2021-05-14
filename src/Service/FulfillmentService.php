@@ -13,6 +13,13 @@ class FulfillmentService extends AbstractService
         return $this->createCollection(Fulfillment::class, $response['fulfillments']);
     }
 
+    public function allForFulfillmentOrder($fulfillmentOrderId, array $params = [])
+    {
+        $endpoint = 'fulfillment_orders/'.$fulfillmentOrderId.'/fulfillments.json';
+        $response = $this->request($endpoint, 'GET', $params);
+        return $this->createCollection(Fulfillment::class, $response['fulfillments']);
+    }
+
     public function count($orderId, array $params = [])
     {
         $endpoint = 'orders/'.$orderId.'/fulfillments/count.json';
