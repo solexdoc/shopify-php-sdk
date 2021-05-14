@@ -17,6 +17,8 @@ class FulfillmentFields extends AbstractObjectEnum
     const LOCATION_ID = 'location_id';
     const UPDATED_AT = 'updated_at';
     const VARIANT_INVENTORY_MANAGEMENT = 'variant_inventory_management';
+    const LINE_ITEMS_BY_FULFILLMENT_ORDER = 'line_items_by_fulfillment_order';
+
 
     public function getFieldTypes()
     {
@@ -33,7 +35,8 @@ class FulfillmentFields extends AbstractObjectEnum
             'tracking_urls' => 'array',
             'location_id' => 'integer',
             'updated_at' => 'DateTime',
-            'variant_inventory_management' => 'string'
+            'variant_inventory_management' => 'string',
+            'line_items_by_fulfillment_order'  => 'LineItemByFulfillmentOrder[]'
         );
     }
 }
