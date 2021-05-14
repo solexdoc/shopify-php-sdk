@@ -61,7 +61,7 @@ class FulfillmentService extends AbstractService
     public function update($orderId, Fulfillment &$fulfillment)
     {
         $data = $fulfillment->exportData();
-        $endpoint = 'orders/'.$orderId.'/fulfillments/'.$fulfillment->gtId().'.json';
+        $endpoint = 'orders/'.$orderId.'/fulfillments/'.$fulfillment->id.'.json';
         $response = $this->request(
             $endpoint, 'POST', array(
             'fulfillment' => $data
@@ -72,21 +72,21 @@ class FulfillmentService extends AbstractService
 
     public function complete($orderId, Fulfillment &$fulfillment)
     {
-        $endpoint = 'orders/'.$orderId.'/fulfillments/'.$fulfillment->getId().'/complete.json';
+        $endpoint = 'orders/'.$orderId.'/fulfillments/'.$fulfillment->id.'/complete.json';
         $response = $this->request($endpoint, 'POST');
         $fulfillment->setData($response['fulfillment']);
     }
 
     public function cancel($orderId, Fulfillment &$fulfillment)
     {
-        $endpoint = 'orders/'.$orderId.'/fulfillments/'.$fulfillment->getId().'/cancel.json';
+        $endpoint = 'orders/'.$orderId.'/fulfillments/'.$fulfillment->id.'/cancel.json';
         $response = $this->request($endpoint, 'POST');
         $fulfillment->setData($response['fulfillment']);
     }
 
     public function open($orderId, Fulfillment &$fulfillment)
     {
-        $endpoint = 'orders/'.$orderId.'/fulfillments/'.$fulfillment->getId().'/open.json';
+        $endpoint = 'orders/'.$orderId.'/fulfillments/'.$fulfillment->id.'/open.json';
         $response = $this->request($endpoint, 'POST');
         $fulfillment->setData($response->fulfillment);
     }
