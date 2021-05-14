@@ -4,14 +4,14 @@ namespace Shopify\Enum\Fields;
 
 class LineItemByFulfillmentOrderFields extends AbstractObjectEnum
 {
-    const ID= 'id';
-    const QUANTITY = 'quantity';
+    const FULLFILLMENT_ORDER_ID = 'fulfillment_order_id';
+    const FULFILLMENT_ORDER_LINE_ITEMS = 'fulfillment_order_line_items';
 
     public function getFieldTypes()
     {
         return array(
-            'id' => 'integer',
-            'quantity' => 'integer'
+            'fulfillment_order_id' => 'integer',
+            'fulfillment_order_line_items' => 'LineItemByFulfillmentOrderFulfillmentOrderLineItem[]'
         );
     }
 }
