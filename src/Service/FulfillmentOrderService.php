@@ -21,6 +21,12 @@ class FulfillmentOrderService extends AbstractService
         return $this->createObject(FulfillmentOrder::class, $response['fulfillment_order']);
     }
 
+    public function cancelWithId(string $fulfillmentOrderId)
+    {
+        $endpoint = 'fulfillment_orders/'.$fulfillmentOrderId.'/cancel.json';
+        $response = $this->request($endpoint, 'POST');
+    }
+
     public function cancel(FulfillmentOrder &$fulfillmentOrder)
     {
         $endpoint = 'fulfillment_orders/'.$fulfillmentOrder->id.'/cancel.json';
