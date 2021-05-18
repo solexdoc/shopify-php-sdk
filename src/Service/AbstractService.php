@@ -52,9 +52,9 @@ abstract class AbstractService
      * @param array $params
      * @return mixed
      */
-    public function request($endpoint, $method = self::REQUEST_METHOD_GET, array $params = [])
+    public function request($endpoint, $method = self::REQUEST_METHOD_GET, array $params = [],array $headers = [])
     {
-        return $this->send(new Request($method, $endpoint), $params);
+        return $this->send(new Request($method, $endpoint,$headers), $params);
     }
 
     /**
@@ -84,6 +84,7 @@ abstract class AbstractService
         } else {
             $args['json'] = $params;
         }
+
         $this->lastResponse = $this->client->send($request, $args);
         return json_decode(
             $this->lastResponse->getBody()->getContents(),
