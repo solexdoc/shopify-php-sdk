@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+    php:
+        build: .docker/php
+        container_name: php-shopify-sdk
+        volumes:
+          - .:/home/wwwroot/php-shopify-sdk
+        environment:
+          - maildev_host=solexis-maildev
+        networks:
+          hostnet: {}
+networks:
+    hostnet:
+        external: true
+        name: sharednetwork

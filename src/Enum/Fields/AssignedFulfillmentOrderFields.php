@@ -31,7 +31,6 @@ class AssignedFulfillmentOrderFields extends AbstractObjectEnum
             'destination' => 'AssignedFulfillmentOrderDestination',
             'line_items' => 'AssignedFulfillmentOrderLineItem[]',
             'outgoing_requests' => 'array',
-            'fulfillment_service_handle' => 'string',
             'assigned_location' => 'AssignedFulfillmentOrderAssignedLocation'
         );
     }
