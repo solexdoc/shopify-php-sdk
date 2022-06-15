@@ -12,9 +12,7 @@ class InventoryLevelService extends AbstractService
         $data = $inventoryLevel->exportData();
         $endpoint = 'inventory_levels/set.json';
         $response = $this->request(
-            $endpoint, 'POST', array(
-                'inventory_level' => $data
-            )
+            $endpoint, 'POST', $data
         );
         $inventoryLevel->setData($response['inventory_level']);
     }
