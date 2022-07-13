@@ -16,7 +16,7 @@ class OrderService extends AbstractService
         /** @var \GuzzleHttp\Psr7\Response $responseHttp */
         $responseHttp = $this->getLastResponse();
 
-        $parsed = Psr7\Header::parse($responseHttp->getHeader('Link'));
+        $parsed = \GuzzleHttp\Psr7\Header::parse($responseHttp->getHeader('Link'));
         foreach($parsed as $row){
             if (array_key_exists('rel',$row) && $row['rel'] == 'next'){
                 $url = $row[0];
