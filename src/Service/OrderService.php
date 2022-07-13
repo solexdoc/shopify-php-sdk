@@ -49,7 +49,7 @@ class OrderService extends AbstractService
         $parsed = \GuzzleHttp\Psr7\Header::parse($responseHttp->getHeader('Link'));
         foreach($parsed as $row){
             if (array_key_exists('rel',$row) && $row['rel'] == 'next'){
-                $ordersNextPage = $this->getNextPageOrders($row[0]);
+                $ordersNextPage = $this->getNextPageOrders("Yo".$row[0]);
                 $orders = array_merge($orders, $ordersNextPage);
                 break;
             }
