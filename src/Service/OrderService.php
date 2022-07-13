@@ -11,10 +11,7 @@ use Shopify\Object\Order;
 class OrderService extends AbstractService
 {
     private function getNextPageOrders(string $url) : array {
-
-        $uri = new Uri($url);
-
-        $response = $this->request($uri, 'GET', []);
+        $response = $this->request($url, 'GET', []);
         $orders = $this->createCollection(Order::class, $response['orders']);
 
         /** @var \GuzzleHttp\Psr7\Response $responseHttp */
