@@ -2,6 +2,7 @@
 
 namespace Shopify\Service;
 
+use GuzzleHttp\Psr7\Uri;
 use http\Client\Response;
 use http\Header;
 use Shopify\Object\Order;
@@ -10,7 +11,10 @@ use Shopify\Object\Order;
 class OrderService extends AbstractService
 {
     private function getNextPageOrders(string $url) : array {
-        $response = $this->request($url, 'GET', []);
+
+        $uri = new Uri($url);
+
+        $response = $this->request($uri, 'GET', []);
         $orders = $this->createCollection(Order::class, $response['orders']);
 
         /** @var \GuzzleHttp\Psr7\Response $responseHttp */
