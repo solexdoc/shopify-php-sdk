@@ -2,10 +2,33 @@
 
 namespace Shopify\Service;
 
+use http\Client\Response;
+use http\Header;
 use Shopify\Object\Order;
+
 
 class OrderService extends AbstractService
 {
+    private function getNextPageOrders(string $url) : array {
+        $response = $this->request($url, 'GET', []);
+        $orders = $this->createCollection(Order::class, $response['orders']);
+
+        /** @var \GuzzleHttp\Psr7\Response $responseHttp */
+        $responseHttp = $this->getLastResponse();
+
+        $parsed = Psr7\Header::parse($responseHttp->getHeader('Link'));
+        foreach($parsed as $row){
+            if (array_key_exists('rel',$row) && $row['rel'] == 'next'){
+                $url = $row[0];
+                $ordersNextPage = $this->getNextPageOrders($url);
+                $orders = array_merge($orders, $ordersNextPage);
+                break;
+            }
+        }
+        return $orders;
+    }
+
+
     /**
      * Retrieve a list of Orders (OPEN Orders by default, use status=any for ALL orders)
      *
@@ -17,7 +40,20 @@ class OrderService extends AbstractService
     {
         $endpoint = 'orders.json';
         $response = $this->request($endpoint, 'GET', $params);
-        return $this->createCollection(Order::class, $response['orders']);
+        $orders = $this->createCollection(Order::class, $response['orders']);
+
+        /** @var \GuzzleHttp\Psr7\Response $responseHttp */
+        $responseHttp = $this->getLastResponse();
+
+        $parsed = Psr7\Header::parse($responseHttp->getHeader('Link'));
+        foreach($parsed as $row){
+            if (array_key_exists('rel',$row) && $row['rel'] == 'next'){
+                $ordersNextPage = $this->getNextPageOrders($row[0]);
+                $orders = array_merge($orders, $ordersNextPage);
+                break;
+            }
+        }
+        return $orders;
     }
 
     /**
