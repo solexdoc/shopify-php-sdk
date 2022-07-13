@@ -21,6 +21,7 @@ class OrderService extends AbstractService
         foreach($parsed as $row){
             if (array_key_exists('rel',$row) && $row['rel'] == 'next'){
                 $url = $row[0];
+                sleep(1);
                 $ordersNextPage = $this->getNextPageOrders(substr($url, 1, -1));
                 $orders = array_merge($orders, $ordersNextPage);
                 break;
