@@ -15,7 +15,7 @@ class OrderFields extends AbstractObjectEnum
     const CLOSED_AT = 'closed_at';
     const CREATED_AT = 'created_at';
     const CURRENCY = 'currency';
-    const CUSTOMER = 'customer';
+//    const CUSTOMER = 'customer';
     const CUSTOMER_LOCALE = 'customer_locale';
     const DISCOUNT_CODES = 'discount_codes';
     const EMAIL = 'email';
@@ -24,7 +24,7 @@ class OrderFields extends AbstractObjectEnum
     const FULFILLMENTS = 'fulfillments';
     const FULFILLMENT_STATUS = 'fulfillment_status';
     const TAGS = 'tags';
-    const GATEWAY = 'gateway';
+//    const GATEWAY = 'gateway';
     const ID = 'id';
     const LANDING_SITE = 'landing_site';
     const LINE_ITEMS = 'line_items';
@@ -34,11 +34,11 @@ class OrderFields extends AbstractObjectEnum
     const NOTE_ATTRIBUTES = 'note_attributes';
     const NUMBER = 'number';
     const ORDER_NUMBER = 'order_number';
-    const PAYMENT_DETAILS = 'payment_details';
+//    const PAYMENT_DETAILS = 'payment_details';
     const PAYMENT_GATEWAY_NAMES = 'payment_gateway_names';
     const PHONE = 'phone';
     consT PROCESSED_AT = 'processed_at';
-    const PROCESSING_METHOD = 'processing_method';
+//    const PROCESSING_METHOD = 'processing_method';
     const REFERRING_SITE = 'referring_site';
     const REFUNDS = 'refunds';
     const SHIPPING_ADDRESS = 'shipping_address';
@@ -51,7 +51,7 @@ class OrderFields extends AbstractObjectEnum
     const TOTAL_DISCOUNTS = 'total_discounts';
     const TOTAL_LINE_ITEMS_PRICE = 'total_line_items_price';
     const TOTAL_PRICE = 'total_price';
-    const TOTAL_PRICE_USD = 'total_price_usd';
+//    const TOTAL_PRICE_USD = 'total_price_usd';
     const TOTAL_TAX = 'total_tax';
     const TOTAL_WEIGHT = 'total_weight';
     const UPDATED_AT = 'updated_at';
@@ -73,7 +73,7 @@ class OrderFields extends AbstractObjectEnum
             'contact_email' => 'string',
             'created_at' => 'DateTime',
             'currency' => 'string',
-            'customer' => 'Customer',
+//            'customer' => 'Customer',
             'customer_locale' => 'string',
             'discount_codes' => 'DiscountCode[]',
             'email' => 'string',
@@ -81,7 +81,7 @@ class OrderFields extends AbstractObjectEnum
             'fulfillments' => 'Fulfillment[]',
             'fulfillment_status' => 'string',
             'tags' => 'string',
-            'gateway' => 'string',
+//            'gateway' => 'string',
             'id' => 'integer',
             'landing_site' => 'string',
             'line_items' => 'LineItem[]',
@@ -91,11 +91,11 @@ class OrderFields extends AbstractObjectEnum
             'note_attributes' => 'array',
             'number' => 'string',
             'order_number' => 'string',
-            'payment_details' => 'object',
+//            'payment_details' => 'object',
             'payment_gateway_names' => 'array',
             'phone' => 'string',
             'processed_at' => 'DateTime',
-            'processing_method' => 'string',
+//            'processing_method' => 'string',
             'referring_site' => 'string',
             'refunds' => 'Refund[]',
             'shipping_address' => 'Address',
@@ -108,7 +108,7 @@ class OrderFields extends AbstractObjectEnum
             'total_discounts' => 'string',
             'total_line_items_price' => 'string',
             'total_price' => 'string',
-            'total_price_usd' => 'string',
+//            'total_price_usd' => 'string',
             'total_tax' => 'string',
             'total_weight' => 'string',
             'updated_at' => 'DateTime',
