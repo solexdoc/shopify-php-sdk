@@ -19,6 +19,9 @@ class ProductService extends AbstractService
         $allProducts = [];
 
         do {
+
+            echo "endpoint :".$endpoint.PHP_EOL;
+
             // Get the current page's data
             $response = $this->request($endpoint, 'GET', $params);
 
@@ -29,8 +32,12 @@ class ProductService extends AbstractService
 
             // Check for pagination in the headers (note the lower-case "link")
             $nextEndpoint = null;
+
+            echo "headers :".PHP_EOL.json_encode($response['headers']).PHP_EOL.PHP_EOL;
+
             if (isset($response['headers']['link'])) {
                 $links = $this->parseLinkHeader($response['headers']['link']);
+                echo "links :".PHP_EOL.json_encode($links).PHP_EOL.PHP_EOL;
                 if (isset($links['next'])) {
                     $nextEndpoint = $links['next'];
                 }
