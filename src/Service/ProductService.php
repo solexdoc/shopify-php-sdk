@@ -20,7 +20,7 @@ class ProductService extends AbstractService
         $allProducts = [];
 
         // Retrieve the base URI from the Guzzle client configuration.
-        $baseUri = $this->client->getConfig('base_uri'); // e.g., "https://aca-wso-canada.myshopify.com/admin/api/2023-04/"
+        $baseUri = $this->getClient()->getConfig('base_uri'); // e.g., "https://aca-wso-canada.myshopify.com/admin/api/2023-04/"
         $basePath = '';
         if ($baseUri) {
             $basePath = parse_url($baseUri, PHP_URL_PATH);
