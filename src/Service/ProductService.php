@@ -22,11 +22,12 @@ class ProductService extends AbstractService
             echo "Requesting endpoint: {$endpoint}\n";
 
             // The request() call returns the decoded body,
-            // but the actual Guzzle response is stored in $this->lastResponse.
+            // but the actual Guzzle response is stored in the raw response.
             $responseBody = $this->request($endpoint, 'GET', $params);
 
-            // Retrieve headers from the raw response.
-            $headers = $this->getLastResponse()->getHeaders();
+            // Retrieve headers from the raw response using the getter.
+            $rawResponse = $this->getLastResponse();
+            $headers = $rawResponse->getHeaders();
 
             if (isset($responseBody['products']) && is_array($responseBody['products'])) {
                 $numProducts = count($responseBody['products']);
@@ -39,7 +40,6 @@ class ProductService extends AbstractService
             // Check for pagination in the headers (using the lower-case 'link' header).
             $nextEndpoint = null;
             if (isset($headers['link'])) {
-                // In some cases the header might be returned as an array.
                 $linkHeader = is_array($headers['link']) ? implode(', ', $headers['link']) : $headers['link'];
                 echo "Link header: {$linkHeader}\n";
                 $links = $this->parseLinkHeader($linkHeader);
@@ -53,10 +53,15 @@ class ProductService extends AbstractService
                 echo "No link header present in the response.\n";
             }
 
-            // If there is a next page, set it as the endpoint,
-            // and clear params since the pagination URL already includes them.
+            // Set up for the next iteration.
             $endpoint = $nextEndpoint;
             $params = [];
+
+            // Delay 1 second between API calls to meet the 2 calls per second rate limit.
+            if ($endpoint) {
+                echo "Waiting 1 second before next API call...\n";
+                sleep(1);
+            }
         } while ($endpoint);
 
         echo "Total products retrieved: " . count($allProducts) . "\n";
