@@ -13,7 +13,7 @@ class ProductService extends AbstractService
      * @param  array $params
      * @return Product[]
      */
-    public function all(array $params = []): array
+    public function all(array $params = [])
     {
         $endpoint = 'products.json';
         $allProducts = [];
@@ -27,10 +27,10 @@ class ProductService extends AbstractService
                 $allProducts = array_merge($allProducts, $response['products']);
             }
 
-            // Check for pagination in the headers
+            // Check for pagination in the headers (note the lower-case "link")
             $nextEndpoint = null;
-            if (isset($response['headers']['Link'])) {
-                $links = $this->parseLinkHeader($response['headers']['Link']);
+            if (isset($response['headers']['link'])) {
+                $links = $this->parseLinkHeader($response['headers']['link']);
                 if (isset($links['next'])) {
                     $nextEndpoint = $links['next'];
                 }
@@ -41,11 +41,12 @@ class ProductService extends AbstractService
             $endpoint = $nextEndpoint;
             $params = [];
         } while ($endpoint);
+
         return $this->createCollection(Product::class, $allProducts);
     }
 
     /**
-     * Parse the Link header from Shopify to extract pagination URLs.
+     * Parse the link header from Shopify to extract pagination URLs.
      *
      * Example header:
      * <https://example.myshopify.com/admin/api/2025-04/products.json?limit=250&page_info=...>; rel="next",
@@ -63,8 +64,10 @@ class ProductService extends AbstractService
             if (count($section) < 2) {
                 continue;
             }
+            // Trim the URL (remove angle brackets and whitespace)
             $url = trim($section[0], " <>\t\n\r\0\x0B");
             $rel = null;
+            // Process each segment to find the rel value and remove quotes if present.
             foreach ($section as $seg) {
                 if (strpos($seg, 'rel=') !== false) {
                     $rel = trim(str_replace('rel=', '', $seg), " \"");
