@@ -33,7 +33,7 @@ class ProductService extends AbstractService
             // Check for pagination in the headers (note the lower-case "link")
             $nextEndpoint = null;
 
-            echo "headers :".PHP_EOL.json_encode($response['headers']).PHP_EOL.PHP_EOL;
+            echo "headers :".PHP_EOL.json_encode($response).PHP_EOL.PHP_EOL;
 
             if (isset($response['headers']['link'])) {
                 $links = $this->parseLinkHeader($response['headers']['link']);
