@@ -15,6 +15,7 @@ class ProductService extends AbstractService
      */
     public function all(array $params = [])
     {
+        // Start with the base endpoint
         $endpoint = 'products.json';
         $allProducts = [];
 
@@ -22,10 +23,10 @@ class ProductService extends AbstractService
             echo "Requesting endpoint: {$endpoint}\n";
 
             // The request() call returns the decoded body,
-            // but the actual Guzzle response is stored in the raw response.
+            // but the actual Guzzle response is stored in $this->lastResponse.
             $responseBody = $this->request($endpoint, 'GET', $params);
 
-            // Retrieve headers from the raw response using the getter.
+            // Retrieve headers using a getter for the raw response.
             $rawResponse = $this->getLastResponse();
             $headers = $rawResponse->getHeaders();
 
@@ -53,11 +54,19 @@ class ProductService extends AbstractService
                 echo "No link header present in the response.\n";
             }
 
-            // Set up for the next iteration.
+            // If a next page was found, prepare for the next iteration.
+            // Also, break if the next endpoint is the same as the current endpoint.
+            $prevEndpoint = $endpoint;
             $endpoint = $nextEndpoint;
+            if ($endpoint && $endpoint === $prevEndpoint) {
+                echo "Next endpoint is the same as current. Exiting loop to avoid infinite loop.\n";
+                break;
+            }
+
+            // Clear params since the pagination URL already includes query parameters.
             $params = [];
 
-            // Delay 1 second between API calls to meet the 2 calls per second rate limit.
+            // Delay 1 second between API calls to respect rate limiting.
             if ($endpoint) {
                 echo "Waiting 1 second before next API call...\n";
                 sleep(1);
@@ -73,8 +82,8 @@ class ProductService extends AbstractService
      * Parse the link header from Shopify to extract pagination URLs.
      *
      * Example header:
-     * <https://example.myshopify.com/admin/api/2025-04/products.json?limit=250&page_info=...>; rel="next",
-     * <https://example.myshopify.com/admin/api/2025-04/products.json?limit=250&page_info=...>; rel="previous"
+     * <https://example.myshopify.com/admin/api/2023-04/products.json?limit=50&page_info=...>; rel="next",
+     * <https://example.myshopify.com/admin/api/2023-04/products.json?limit=50&page_info=...>; rel="previous"
      *
      * @param string $header
      * @return array
