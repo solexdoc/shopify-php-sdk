@@ -19,21 +19,21 @@ class ProductService extends AbstractService
         $endpoint = 'products.json';
         $allProducts = [];
 
-        // Retrieve the base URI from the Guzzle client configuration.
-        $baseUri = $this->getClient()->getConfig('base_uri'); // e.g., "https://aca-wso-canada.myshopify.com/admin/api/2023-04/"
-        $basePath = '';
-        if ($baseUri) {
-            $basePath = parse_url($baseUri, PHP_URL_PATH);
-            $basePath = ltrim($basePath, '/'); // e.g., "admin/api/2023-04/"
+        // Retrieve the base URI from the client configuration via a getter.
+        $client = $this->getClient();
+        $config = $client->getConfig();
+        $baseUri = isset($config['base_uri']) ? $config['base_uri'] : '';
+        if ($baseUri instanceof \Psr\Http\Message\UriInterface) {
+            $baseUri = (string)$baseUri;
         }
+        $basePath = $baseUri ? ltrim(parse_url($baseUri, PHP_URL_PATH), '/') : '';
 
         do {
             echo "Requesting endpoint: {$endpoint}\n";
 
-            // Make the API call. The decoded JSON is returned but the raw response is stored in $this->lastResponse.
+            // Perform the API call. The decoded JSON is returned,
+            // while the full response (with headers) is stored in $this->lastResponse.
             $responseBody = $this->request($endpoint, 'GET', $params);
-
-            // Retrieve headers from the raw response using the getter.
             $rawResponse = $this->getLastResponse();
             $headers = $rawResponse->getHeaders();
 
@@ -45,7 +45,7 @@ class ProductService extends AbstractService
                 echo "No products found in this response.\n";
             }
 
-            // Check for pagination in the headers (using the lower-case 'link' header)
+            // Look for a "link" header (lowercase) to check for pagination.
             $nextEndpoint = null;
             if (isset($headers['link'])) {
                 $linkHeader = is_array($headers['link']) ? implode(', ', $headers['link']) : $headers['link'];
@@ -61,7 +61,7 @@ class ProductService extends AbstractService
                 echo "No link header present in the response.\n";
             }
 
-            // If a next link exists, parse it to extract the relative endpoint and query parameters.
+            // If a next link exists, extract the relative endpoint and query parameters.
             if ($nextEndpoint) {
                 $parsedUrl = parse_url($nextEndpoint);
                 $newEndpoint = isset($parsedUrl['path']) ? ltrim($parsedUrl['path'], '/') : '';
@@ -69,10 +69,9 @@ class ProductService extends AbstractService
                 if (isset($parsedUrl['query'])) {
                     parse_str($parsedUrl['query'], $newParams);
                 }
-                // Remove the base path (if it exists) from the new endpoint.
+                // Remove the base path (if present) from the new endpoint.
                 if ($basePath && strpos($newEndpoint, $basePath) === 0) {
-                    $newEndpoint = substr($newEndpoint, strlen($basePath));
-                    $newEndpoint = ltrim($newEndpoint, '/'); // Ensure no leading slash remains.
+                    $newEndpoint = ltrim(substr($newEndpoint, strlen($basePath)), '/');
                 }
                 echo "Parsed next endpoint: {$newEndpoint} with params: " . json_encode($newParams) . "\n";
                 $endpoint = $newEndpoint;
@@ -81,7 +80,7 @@ class ProductService extends AbstractService
                 $endpoint = null;
             }
 
-            // Delay 1 second between API calls to respect rate limiting.
+            // Respect rate limits by waiting 1 second between calls.
             if ($endpoint) {
                 echo "Waiting 1 second before next API call...\n";
                 sleep(1);
@@ -89,20 +88,17 @@ class ProductService extends AbstractService
         } while ($endpoint);
 
         echo "Total products retrieved: " . count($allProducts) . "\n";
-
         return $this->createCollection(Product::class, $allProducts);
     }
 
-
     /**
-     * Parse the link header from Shopify to extract pagination URLs.
+     * Parse the Link header from Shopify to extract pagination URLs.
      *
-     * Example header:
-     * <https://example.myshopify.com/admin/api/2023-04/products.json?limit=50&page_info=...>; rel="next",
-     * <https://example.myshopify.com/admin/api/2023-04/products.json?limit=50&page_info=...>; rel="previous"
+     * Expected format (comma-separated):
+     * <https://example.com/path?query=...>; rel="next", <https://example.com/path?query=...>; rel="previous"
      *
      * @param string $header
-     * @return array
+     * @return array  Associative array keyed by the rel value (e.g. "next", "previous")
      */
     private function parseLinkHeader($header)
     {
@@ -113,10 +109,8 @@ class ProductService extends AbstractService
             if (count($section) < 2) {
                 continue;
             }
-            // Trim the URL (remove angle brackets and whitespace)
             $url = trim($section[0], " <>\t\n\r\0\x0B");
             $rel = null;
-            // Process each segment to find the rel value and remove quotes if present.
             foreach ($section as $seg) {
                 if (strpos($seg, 'rel=') !== false) {
                     $rel = trim(str_replace('rel=', '', $seg), " \"");
