@@ -13,11 +13,68 @@ class ProductService extends AbstractService
      * @param  array $params
      * @return Product[]
      */
-    public function all(array $params = [])
+    public function all(array $params = []): array
     {
         $endpoint = 'products.json';
-        $response = $this->request($endpoint, 'GET', $params);
-        return $this->createCollection(Product::class, $response['products']);
+        $allProducts = [];
+
+        do {
+            // Get the current page's data
+            $response = $this->request($endpoint, 'GET', $params);
+
+            // Merge products if they exist
+            if (isset($response['products']) && is_array($response['products'])) {
+                $allProducts = array_merge($allProducts, $response['products']);
+            }
+
+            // Check for pagination in the headers
+            $nextEndpoint = null;
+            if (isset($response['headers']['Link'])) {
+                $links = $this->parseLinkHeader($response['headers']['Link']);
+                if (isset($links['next'])) {
+                    $nextEndpoint = $links['next'];
+                }
+            }
+
+            // Set the endpoint to the next link if available,
+            // and clear additional params since the next URL already contains them.
+            $endpoint = $nextEndpoint;
+            $params = [];
+        } while ($endpoint);
+        return $this->createCollection(Product::class, $allProducts);
+    }
+
+    /**
+     * Parse the Link header from Shopify to extract pagination URLs.
+     *
+     * Example header:
+     * <https://example.myshopify.com/admin/api/2025-04/products.json?limit=250&page_info=...>; rel="next",
+     * <https://example.myshopify.com/admin/api/2025-04/products.json?limit=250&page_info=...>; rel="previous"
+     *
+     * @param string $header
+     * @return array
+     */
+    private function parseLinkHeader($header)
+    {
+        $links = [];
+        $parts = explode(',', $header);
+        foreach ($parts as $part) {
+            $section = explode(';', $part);
+            if (count($section) < 2) {
+                continue;
+            }
+            $url = trim($section[0], " <>\t\n\r\0\x0B");
+            $rel = null;
+            foreach ($section as $seg) {
+                if (strpos($seg, 'rel=') !== false) {
+                    $rel = trim(str_replace('rel=', '', $seg), " \"");
+                }
+            }
+            if ($rel) {
+                $links[$rel] = $url;
+            }
+        }
+        return $links;
     }
 
     /**
