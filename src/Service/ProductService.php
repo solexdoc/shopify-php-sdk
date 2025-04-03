@@ -15,23 +15,21 @@ class ProductService extends AbstractService
      */
     public function all(array $params = [])
     {
-        // Start with the base endpoint
+        // Start with the initial endpoint (relative path)
         $endpoint = 'products.json';
         $allProducts = [];
 
         do {
             echo "Requesting endpoint: {$endpoint}\n";
 
-            // The request() call returns the decoded body,
-            // but the actual Guzzle response is stored in $this->lastResponse.
+            // Make the API call; the decoded body is returned but the full response is stored in $this->lastResponse.
             $responseBody = $this->request($endpoint, 'GET', $params);
 
-            // Retrieve headers using a getter for the raw response.
+            // Retrieve headers using the getter for the raw response.
             $rawResponse = $this->getLastResponse();
             $headers = $rawResponse->getHeaders();
 
-            echo "Response headers:\n".json_encode($headers, JSON_UNESCAPED_UNICODE)."\n";
-            echo PHP_EOL;
+            // Process the products from the response body.
             if (isset($responseBody['products']) && is_array($responseBody['products'])) {
                 $numProducts = count($responseBody['products']);
                 echo "Retrieved {$numProducts} products from this page.\n";
@@ -40,7 +38,7 @@ class ProductService extends AbstractService
                 echo "No products found in this response.\n";
             }
 
-            // Check for pagination in the headers (using the lower-case 'link' header).
+            // Check for the "link" header (lowercase) for pagination.
             $nextEndpoint = null;
             if (isset($headers['link'])) {
                 $linkHeader = is_array($headers['link']) ? implode(', ', $headers['link']) : $headers['link'];
@@ -48,7 +46,7 @@ class ProductService extends AbstractService
                 $links = $this->parseLinkHeader($linkHeader);
                 if (isset($links['next'])) {
                     $nextEndpoint = $links['next'];
-                    echo "Found next page: {$nextEndpoint}\n";
+                    echo "Found next page link: {$nextEndpoint}\n";
                 } else {
                     echo "No next page link found in the header.\n";
                 }
@@ -56,17 +54,21 @@ class ProductService extends AbstractService
                 echo "No link header present in the response.\n";
             }
 
-            // If a next page was found, prepare for the next iteration.
-            // Also, break if the next endpoint is the same as the current endpoint.
-            $prevEndpoint = $endpoint;
-            $endpoint = $nextEndpoint;
-            if ($endpoint && $endpoint === $prevEndpoint) {
-                echo "Next endpoint is the same as current. Exiting loop to avoid infinite loop.\n";
-                break;
+            // If a next link is provided, parse it to extract the relative endpoint and query parameters.
+            if ($nextEndpoint) {
+                $parsedUrl = parse_url($nextEndpoint);
+                // Remove any leading slash to get a relative endpoint.
+                $newEndpoint = isset($parsedUrl['path']) ? ltrim($parsedUrl['path'], '/') : '';
+                $newParams = [];
+                if (isset($parsedUrl['query'])) {
+                    parse_str($parsedUrl['query'], $newParams);
+                }
+                echo "Parsed next endpoint: {$newEndpoint} with params: " . json_encode($newParams) . "\n";
+                $endpoint = $newEndpoint;
+                $params = $newParams;
+            } else {
+                $endpoint = null;
             }
-
-            // Clear params since the pagination URL already includes query parameters.
-            $params = [];
 
             // Delay 1 second between API calls to respect rate limiting.
             if ($endpoint) {
@@ -79,6 +81,7 @@ class ProductService extends AbstractService
 
         return $this->createCollection(Product::class, $allProducts);
     }
+
 
     /**
      * Parse the link header from Shopify to extract pagination URLs.
