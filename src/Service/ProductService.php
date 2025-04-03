@@ -19,35 +19,47 @@ class ProductService extends AbstractService
         $allProducts = [];
 
         do {
+            echo "Requesting endpoint: {$endpoint}\n";
 
-            echo "endpoint :".$endpoint.PHP_EOL;
+            // The request() call returns the decoded body,
+            // but the actual Guzzle response is stored in $this->lastResponse.
+            $responseBody = $this->request($endpoint, 'GET', $params);
 
-            // Get the current page's data
-            $response = $this->request($endpoint, 'GET', $params);
+            // Retrieve headers from the raw response.
+            $headers = $this->getLastResponse()->getHeaders();
 
-            // Merge products if they exist
-            if (isset($response['products']) && is_array($response['products'])) {
-                $allProducts = array_merge($allProducts, $response['products']);
+            if (isset($responseBody['products']) && is_array($responseBody['products'])) {
+                $numProducts = count($responseBody['products']);
+                echo "Retrieved {$numProducts} products from this page.\n";
+                $allProducts = array_merge($allProducts, $responseBody['products']);
+            } else {
+                echo "No products found in this response.\n";
             }
 
-            // Check for pagination in the headers (note the lower-case "link")
+            // Check for pagination in the headers (using the lower-case 'link' header).
             $nextEndpoint = null;
-
-            echo "headers :".PHP_EOL.json_encode($response).PHP_EOL.PHP_EOL;
-
-            if (isset($response['headers']['link'])) {
-                $links = $this->parseLinkHeader($response['headers']['link']);
-                echo "links :".PHP_EOL.json_encode($links).PHP_EOL.PHP_EOL;
+            if (isset($headers['link'])) {
+                // In some cases the header might be returned as an array.
+                $linkHeader = is_array($headers['link']) ? implode(', ', $headers['link']) : $headers['link'];
+                echo "Link header: {$linkHeader}\n";
+                $links = $this->parseLinkHeader($linkHeader);
                 if (isset($links['next'])) {
                     $nextEndpoint = $links['next'];
+                    echo "Found next page: {$nextEndpoint}\n";
+                } else {
+                    echo "No next page link found in the header.\n";
                 }
+            } else {
+                echo "No link header present in the response.\n";
             }
 
-            // Set the endpoint to the next link if available,
-            // and clear additional params since the next URL already contains them.
+            // If there is a next page, set it as the endpoint,
+            // and clear params since the pagination URL already includes them.
             $endpoint = $nextEndpoint;
             $params = [];
         } while ($endpoint);
+
+        echo "Total products retrieved: " . count($allProducts) . "\n";
 
         return $this->createCollection(Product::class, $allProducts);
     }
@@ -86,7 +98,6 @@ class ProductService extends AbstractService
         }
         return $links;
     }
-
     /**
      * Receive a count of all Products
      *
