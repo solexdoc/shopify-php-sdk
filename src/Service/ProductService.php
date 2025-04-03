@@ -19,17 +19,24 @@ class ProductService extends AbstractService
         $endpoint = 'products.json';
         $allProducts = [];
 
+        // Retrieve the base URI from the Guzzle client configuration.
+        $baseUri = $this->client->getConfig('base_uri'); // e.g., "https://aca-wso-canada.myshopify.com/admin/api/2023-04/"
+        $basePath = '';
+        if ($baseUri) {
+            $basePath = parse_url($baseUri, PHP_URL_PATH);
+            $basePath = ltrim($basePath, '/'); // e.g., "admin/api/2023-04/"
+        }
+
         do {
             echo "Requesting endpoint: {$endpoint}\n";
 
-            // Make the API call; the decoded body is returned but the full response is stored in $this->lastResponse.
+            // Make the API call. The decoded JSON is returned but the raw response is stored in $this->lastResponse.
             $responseBody = $this->request($endpoint, 'GET', $params);
 
-            // Retrieve headers using the getter for the raw response.
+            // Retrieve headers from the raw response using the getter.
             $rawResponse = $this->getLastResponse();
             $headers = $rawResponse->getHeaders();
 
-            // Process the products from the response body.
             if (isset($responseBody['products']) && is_array($responseBody['products'])) {
                 $numProducts = count($responseBody['products']);
                 echo "Retrieved {$numProducts} products from this page.\n";
@@ -38,7 +45,7 @@ class ProductService extends AbstractService
                 echo "No products found in this response.\n";
             }
 
-            // Check for the "link" header (lowercase) for pagination.
+            // Check for pagination in the headers (using the lower-case 'link' header)
             $nextEndpoint = null;
             if (isset($headers['link'])) {
                 $linkHeader = is_array($headers['link']) ? implode(', ', $headers['link']) : $headers['link'];
@@ -54,14 +61,18 @@ class ProductService extends AbstractService
                 echo "No link header present in the response.\n";
             }
 
-            // If a next link is provided, parse it to extract the relative endpoint and query parameters.
+            // If a next link exists, parse it to extract the relative endpoint and query parameters.
             if ($nextEndpoint) {
                 $parsedUrl = parse_url($nextEndpoint);
-                // Remove any leading slash to get a relative endpoint.
                 $newEndpoint = isset($parsedUrl['path']) ? ltrim($parsedUrl['path'], '/') : '';
                 $newParams = [];
                 if (isset($parsedUrl['query'])) {
                     parse_str($parsedUrl['query'], $newParams);
+                }
+                // Remove the base path (if it exists) from the new endpoint.
+                if ($basePath && strpos($newEndpoint, $basePath) === 0) {
+                    $newEndpoint = substr($newEndpoint, strlen($basePath));
+                    $newEndpoint = ltrim($newEndpoint, '/'); // Ensure no leading slash remains.
                 }
                 echo "Parsed next endpoint: {$newEndpoint} with params: " . json_encode($newParams) . "\n";
                 $endpoint = $newEndpoint;
