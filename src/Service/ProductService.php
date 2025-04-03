@@ -30,6 +30,8 @@ class ProductService extends AbstractService
             $rawResponse = $this->getLastResponse();
             $headers = $rawResponse->getHeaders();
 
+            echo "Response headers:\n".json_encode($headers, JSON_UNESCAPED_UNICODE)."\n";
+            echo PHP_EOL;
             if (isset($responseBody['products']) && is_array($responseBody['products'])) {
                 $numProducts = count($responseBody['products']);
                 echo "Retrieved {$numProducts} products from this page.\n";
